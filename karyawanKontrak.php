@@ -1,9 +1,6 @@
 <?php
 require_once 'koneksi.php';
 
-// ==========================================
-// SUBCLASS: KARYAWAN KONTRAK
-// ==========================================
 class KaryawanKontrak extends Karyawan {
     private $durasiKontrakBulan;
     private $agensiPenyalur;
@@ -14,8 +11,14 @@ class KaryawanKontrak extends Karyawan {
         $this->agensiPenyalur = $agensiPenyalur;
     }
 
+    // OVERRIDING METHOD 1: Hitung Gaji Bersih
     public function hitungGajiBersih() {
-        return ($this->hariKerjaMasuk * $this->gajiDasarPerHari);
+        return $this->hariKerjaMasuk * $this->gajiDasarPerHari;
+    }
+
+    // OVERRIDING METHOD 2: Hitung Total Biaya (Akurat 100%)
+    public function hitungTotalBiaya() {
+        return $this->hitungGajiBersih();
     }
 
     public function tampilkanProfilKaryawan() {
@@ -24,30 +27,23 @@ class KaryawanKontrak extends Karyawan {
             <h3>[KONTRAK] {$this->nama_karyawan} ({$this->id_karyawan})</h3>
             <p><strong>Departemen:</strong> {$this->departemen}</p>
             <p><strong>Hari Kerja:</strong> {$this->hariKerjaMasuk} hari</p>
-            <p><strong>Durasi Kontrak:</strong> {$this->durasiKontrakBulan} Bulan</p>
-            <p><strong>Agensi Penyalur:</strong> {$this->agensiPenyalur}</p>
-            <p class='gaji'><strong>Gaji Bersih:</strong> Rp " . number_format($this->hitungGajiBersih(), 2, ',', '.') . "</p>
+            <p><strong>Agensi:</strong> {$this->agensiPenyalur}</p>
+            <p><strong>Gaji Bersih:</strong> Rp " . number_format($this->hitungGajiBersih(), 2, ',', '.') . "</p>
+            <p class='gaji'><strong>Total Biaya Kompensasi:</strong> Rp " . number_format($this->hitungTotalBiaya(), 2, ',', '.') . "</p>
         </div>";
     }
 }
 
-// ==========================================
-// METODE QUERY BERSYARAT (SELECT * WHERE)
-// ==========================================
+// Query Bersyarat (WHERE)
 $daftarKaryawanKontrak = [];
 $query_kontrak = "SELECT * FROM tabel_karyawan WHERE jenis_karyawan = 'kontrak'";
 $result_kontrak = mysqli_query($koneksi, $query_kontrak);
-
 if ($result_kontrak) {
     while ($row = mysqli_fetch_assoc($result_kontrak)) {
         $daftarKaryawanKontrak[] = new KaryawanKontrak(
-            $row['id_karyawan'],
-            $row['nama_karyawan'],
-            $row['departemen'],
-            $row['hari_kerja_masuk'],
-            $row['gaji_dasar_per_hari'],
-            $row['durasi_kontrak_bulan'],
-            $row['agensi_penyalur']
+            $row['id_karyawan'], $row['nama_karyawan'], $row['departemen'], 
+            $row['hari_kerja_masuk'], $row['gaji_dasar_per_hari'], 
+            $row['durasi_kontrak_bulan'], $row['agensi_penyalur']
         );
     }
 }
